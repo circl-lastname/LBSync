@@ -36,7 +36,12 @@ $hash"
   done
 
   for hash in $commit_hashes; do
-    git cherry-pick -x $hash
+    if ! git cherry-pick -x $hash; then
+      read -p "You may now fix the cherry-pick error. Continue? y/n " yn
+      if [ $yn != "y" ]; then
+        exit
+      fi
+    fi
   done
 done
 
@@ -48,7 +53,7 @@ else
   title="Cherry-pick $# PRs from Ladybird"
 fi
 
-read -p "You may edit the commits now. Create PR? " yn
+read -p "You may edit the commits now. Create PR? y/n " yn
 
 if [ $yn = "y" ]; then
   git push --set-upstream serenity_fork $branch_id
