@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -e
+IFS="
+"
+
+branch_id=""
+
+if [ $# = 1 ]; then
+  branch_id="pr_$1"
+else
+  branch_id="bulk_sync_$(date +%s)"
+fi
+
+pr_title=""
+body=""
+
+git checkout serenity_master
+git checkout -B $branch_id
+
+for pr_number in $@; do
+  body="${body}Cherry-picks LadybirdBrowser/ladybird#$pr_number<br>"
+
+  pr=$(gh pr view $pr_number --json title,commits)
+  pr_title=$(jq -r ".title" <<< "$pr")
+  pr_commits=$(jq -r ".commits[].messageHeadline" <<< "$pr")
+
+  commit_hashes=""
+
+  for commit in $pr_commits; do
+    hash=$(gh search commits --repo "LadybirdBrowser/ladybird" "$commit" --json sha | jq -r ".[0].sha")
+    echo "Found commit $hash"
+    
+    commit_hashes="$commit_hashes
+$hash"
+  done
+
+  for hash in $commit_hashes; do
+    git cherry-pick -x $hash
+  done
+done
+
+title=""
+
+if [ $# = 1 ]; then
+  title="Cherry-pick \"$pr_title\""
+else
+  title="Cherry-pick $# PRs from Ladybird"
+fi
+
+read -p "You may edit the commits now. Create PR? " yn
+
+if [ $yn = "y" ]; then
+  git push --set-upstream serenity_fork $branch_id
+  gh pr create --repo "SerenityOS/serenity" --title "$title" --body "$body<sub>Generated with LBSync, did I do well?</sub>"
+fi
