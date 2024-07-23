@@ -1,0 +1,2 @@
+# LBSync
+Ladybird syncing script
