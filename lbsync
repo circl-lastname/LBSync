@@ -4,6 +4,9 @@ set -e
 IFS="
 "
 
+SERENITY_MASTER=${SERENITY_MASTER:-serenity_master}
+SERENITY_FORK=${SERENITY_FORK:-serenity_fork}
+
 branch_id=""
 
 if [ $# = 1 ]; then
@@ -15,7 +18,7 @@ fi
 pr_title=""
 body=""
 
-git checkout serenity_master
+git checkout $SERENITY_MASTER
 git checkout -B $branch_id
 
 for pr_number in $@; do
@@ -40,7 +43,7 @@ $hash"
       read -p "You may now fix the cherry-pick error. Continue? y/n " yn
       if [ $yn != "y" ]; then
         git cherry-pick --abort || true
-        git checkout serenity_master
+        git checkout $SERENITY_MASTER
         git branch -D $branch_id
         exit
       fi
@@ -59,6 +62,6 @@ fi
 read -p "You may edit the commits now. Create PR? y/n " yn
 
 if [ $yn = "y" ]; then
-  git push --set-upstream serenity_fork $branch_id
+  git push --set-upstream $SERENITY_FORK $branch_id
   gh pr create --repo "SerenityOS/serenity" --title "$title" --body "$body<sub>Generated with [LBSync](https://github.com/circl-lastname/LBSync), did I do well?</sub>"
 fi
