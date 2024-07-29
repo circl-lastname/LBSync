@@ -39,6 +39,9 @@ $hash"
     if ! git cherry-pick -x $hash; then
       read -p "You may now fix the cherry-pick error. Continue? y/n " yn
       if [ $yn != "y" ]; then
+        git cherry-pick --abort || true
+        git checkout serenity_master
+        git branch -D $branch_id
         exit
       fi
     fi
