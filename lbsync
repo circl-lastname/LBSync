@@ -63,5 +63,5 @@ read -p "You may edit the commits now. Create PR? y/n " yn
 
 if [ $yn = "y" ]; then
   git push --set-upstream $SERENITY_FORK $branch_id
-  gh pr create --repo "SerenityOS/serenity" --title "$title" --body "$body<sub>Generated with [LBSync](https://github.com/circl-lastname/LBSync), did I do well?</sub>"
+  gh pr create --repo "SerenityOS/serenity" --title "$title" --body "$body<sub>Generated with [LBSync](https://github.com/circl-lastname/LBSync)</sub>"
 fi
